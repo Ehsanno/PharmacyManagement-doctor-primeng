@@ -1,0 +1,185 @@
+<div class="grid">
+    <div class="col-12">
+        <div class="card">
+            <div class="flex align-items-center">
+                <i class="pi pi-search text-primary ml-3 text-xl"></i>
+                <span class="text-lg text-600 flex-grow-1">لیست پزشکان</span>
+            </div>
+
+            <p-divider></p-divider>
+            <form [formGroup]="doctorSearchFormGroup">
+                <div class="p-fluid grid mt-1" pFocusTrap>
+
+                    <div class="col-12 md:col-3">
+                        <span class="p-float-label">
+                            <input type="text" (keypress)="numericOnly($event)" (keydown.enter)="checkIsEmpty()"
+                                formControlName="query" pInputText dvcTabIndex="1">
+                            <label>کد نظام پزشکی</label>
+                        </span>
+                    </div>
+
+                    <div class="col-12 md:col-3">
+                        <span class="p-float-label">
+                            <input type="text" (keydown.enter)="checkIsEmpty()" formControlName="name" pInputText
+                                dvcTabIndex="2">
+                            <label>نام</label>
+                        </span>
+                    </div>
+
+                    <div class="col-12 md:col-3">
+                        <span class="p-float-label">
+                            <input type="text" (keydown.enter)="checkIsEmpty()" formControlName="specialCode" pInputText
+                                dvcTabIndex="3">
+                            <label>کد کاربری</label>
+                        </span>
+                    </div>
+
+                    <div class="col-12 md:col-3">
+                        <span class="p-float-label">
+                            <p-dropdown (keydown.enter)="checkIsEmpty()" [autoDisplayFirst]="true"
+                                formControlName="speciality" [options]="specialityList" dvcTabIndex="4"
+                                optionLabel="title" (ngModelChange)="updateAdvanceSpecialityList()"></p-dropdown>
+                            <label>تعهد</label>
+                        </span>
+                    </div>
+                    <div class="col-12 md:col-3">
+                        <span class="p-float-label">
+                            <p-autoComplete (keydown.enter)="checkIsEmpty()" emptyMessage="موردی یافت نشد"
+                                formControlName="advancedSpeciality" [showEmptyMessage]="true"
+                                [suggestions]="finalAdvancedSpecialityList | async "
+                                (completeMethod)="filterAdvanceSpeciality($event)" dvcTabIndex="5"
+                                field="title"></p-autoComplete>
+                            <label>تخصص</label>
+                        </span>
+                    </div>
+                    <div class="col-12 md:col-3">
+                        <span class="p-float-label">
+                            <p-dropdown (keydown.enter)="checkIsEmpty()" [autoDisplayFirst]="true"
+                                formControlName="isNational" [options]="national" dvcTabIndex="6"
+                                optionLabel="name"></p-dropdown>
+                            <label>ملیت</label>
+                        </span>
+                    </div>
+                    <div class="col-12 md:col-3">
+                        <span class="p-float-label">
+                            <p-dropdown (keydown.enter)="checkIsEmpty()" [autoDisplayFirst]="true"
+                                formControlName="deleted" [options]="softDeleted" dvcTabIndex="7"
+                                optionLabel="name"></p-dropdown>
+                            <label>نمایش لیست</label>
+                        </span>
+                    </div>
+                    <div class="col-12 md:col-3">
+                        <span class="field-checkbox">
+                            <p-checkbox (keydown.enter)="checkIsEmpty()" dvcTabIndex="8" [binary]="true"
+                                formControlName="fetchFromHq" inputId="hq"></p-checkbox>
+                            <label (click)="startSearch()" for="hq">واکشی از سرور اصلی</label>
+                        </span>
+                    </div>
+                    <div class="col-12 md:col-3">
+                        <span class="field-checkbox">
+                            <p-checkbox (keydown.enter)="checkIsEmpty()" dvcTabIndex="9" formControlName="suspended"
+                                [binary]="true" inputId="suspended"></p-checkbox>
+                            <label (click)="startSearch()" for="suspended">دکتر های معلق شده</label>
+                        </span>
+                    </div>
+                    <div class="col-6 md:col-2 mr-auto">
+                        <p-button label="جستجو" dvcTabIndex="10" icon="pi pi-search" (click)="startSearch()"
+                            (keydown.enter)="startSearch()" [loading]="isLoading"></p-button>
+                    </div>
+
+                    <div class="col-6 md:col-2">
+                        <button pButton pRipple type="button" (click)="addEditDoctor()" icon="pi pi-plus" label="جدید"
+                            class="p-button-outlined p-button-secondary"></button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card">
+            <p-table [loading]="isLoading" [value]="doctorsList" scrollDirection="both" sortMode="single"
+                [customSort]="true" [scrollable]="true" styleClass="mt-3" [paginator]="false" [rowHover]="true"
+                [showCurrentPageReport]="true" responsiveLayout="scroll">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width:30px">ردیف </th>
+                        <th (click)="this.searchDoctor(0, 'MedicalSystemCode', doctorSearch.sortingFieldName!=='MedicalSystemCode' ? true :!doctorSearch.ascending )"
+                            pSortableColumn="MedicalSystemCode"> <p-sortIcon field="MedicalSystemCode"></p-sortIcon>
+                            شماره نظام </th>
+                        <th (click)="this.searchDoctor(0, 'LastName', doctorSearch.sortingFieldName!=='LastName' ? true :!doctorSearch.ascending )"
+                            pSortableColumn="LastName">
+                            <p-sortIcon field="LastName"></p-sortIcon>نام و نام‌خانوادگی
+                        </th>
+                        <th (click)="this.searchDoctor(0, 'SpecialCode', doctorSearch.sortingFieldName!=='SpecialCode' ? true :!doctorSearch.ascending )"
+                            pSortableColumn="SpecialCode">
+                            <p-sortIcon field="SpecialCode"></p-sortIcon>کد اختصاصی
+                        </th>
+                        <th>تعهد و تخصص</th>
+                        <th>ملیت</th>
+                        <th>نوع تعهد</th>
+                        <th>محل همکاری</th>
+                        <th>شناسه سلامت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </ng-template>
+                <ng-template let-i="rowIndex" pTemplate="body" let-doctor>
+                    <tr>
+                        <td style="width:30px" class="font-bold">{{i+( (doctorSearch.pageNumber-1) * pageSize)+1}}</td>
+                        <td>{{ doctor.medicalSystemCode}}</td>
+                        <td>
+                            <div class="flex flex-column align-items-start">
+                                <span class="text-800 font-semibold"> {{ doctor.firstName }} {{ doctor.lastName
+                                    }}</span>
+                                <span *ngIf="doctor.comment" class="cl-yellow p-1 border-round-lg">{{ doctor.comment
+                                    }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <ng-container *ngIf="doctor.specialCode; else elseTemplate">
+                                {{doctor.specialCode}}
+                            </ng-container>
+                            <ng-template #elseTemplate>
+                                <span class="text-600">ثبت نشده</span>
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div class="flex flex-row align-items-center flex-wrap justify-content-start gap-1">
+                                <span class="{{doctor.speciality.color}} p-1 border-round-lg">
+                                    {{ doctor.speciality.title }}</span>
+                                <span *ngIf="doctor.advancedSpecialityId">
+                                    {{ doctor.advancedSpeciality.title }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>{{ doctor.nationality ? "ایرانی" : "غیر ایرانی" }}</td>
+                        <!-- <td>{{ doctor.comment }}</td> -->
+                        <td>{{ doctor.partnerType }}</td>
+                        <td> {{ doctor.partnerName }}</td>
+                        <td>{{ doctor.slmPartyId }}</td>
+                        <td>
+                            <ng-container *ngIf="!this.doctor.inLocalDb; else functionElse">
+                                <button type="button" pRipple pButton icon="pi pi-cloud-download"
+                                    class="p-button-rounded p-button-text"
+                                    (click)="this.confirmAttachDialog(doctor, $event)"></button>
+                            </ng-container>
+                            <ng-template #functionElse>
+                                <button type="button" pRipple pButton icon="pi pi-ellipsis-v"
+                                    class="p-button-rounded p-button-text"
+                                    (click)="configMenuList(doctor,$event);menu.toggle($event)"></button>
+                                <p-menu #menu appendTo="body" [popup]="true" [model]="listMenu"></p-menu>
+
+                            </ng-template>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+            <p-paginator [hidden]="isLoading" [pageLinkSize]="4" [rows]="pageSize" #paginator
+                (onPageChange)="searchDoctor($event.page)" [totalRecords]="totalCount"></p-paginator>
+        </div>
+    </div>
+
+</div>
+<!-- <p-confirmDialog [style]="{width: '30vw'}" icon=" pi pi-exclamation-triangle"></p-confirmDialog> -->
+<p-confirmPopup [style]="{minWidth: '15vw'}"></p-confirmPopup>
+<p-toast [position]="uiService._toastPosition"></p-toast>
